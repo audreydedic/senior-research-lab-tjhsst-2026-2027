@@ -18,7 +18,7 @@ planeId = p.loadURDF("plane.urdf")
 startPos = [0,0,1]
 startOrientation = p.getQuaternionFromEuler([0,0,0])
 
-boxId = p.loadURDF("cube.urdf",startPos, startOrientation)
+boxId = p.loadURDF("../assets/racer.urdf",startPos, startOrientation)
 #set the center of mass frame (loadURDF sets base link frame) startPos/Ornp.resetBasePositionAndOrientation(boxId, startPos, startOrientation)
 for i in range (10000):
     p.stepSimulation()
