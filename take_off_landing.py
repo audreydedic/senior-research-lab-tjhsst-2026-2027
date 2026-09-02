@@ -18,7 +18,11 @@ time.sleep(1)
 
 # movement commands
 drone.takeoff()
-drone.move("forward",20)
+drone.move_up(50)
+drone.move_forward(100)
+drone.flip_forward()
+drone.move_back(100)
+drone.flip_back()
 drone.land()
 
 # reboot/end tello drone object
