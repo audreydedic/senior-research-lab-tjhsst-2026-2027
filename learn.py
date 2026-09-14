@@ -36,4 +36,4 @@ eval_env = HoverAviary(obs=DEFAULT_OBS, act=DEFAULT_ACT)
 model = PPO('MlpPolicy',train_env,verbose=1)
 
 # save trained model
-model.save('agent.zip')
+model.save('model.zip')

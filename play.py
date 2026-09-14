@@ -10,7 +10,7 @@ from gym_pybullet_drones.utils.enums import ObservationType, ActionType
 from gym_pybullet_drones.utils.utils import sync
 from gym_pybullet_drones.utils.Logger import Logger
 
-DEFAULT_MODEL_PATH = "agent.zip"
+DEFAULT_MODEL_PATH = "model.zip"
 DEFAULT_GUI = True
 DEFAULT_OBS = ObservationType('kin')
 DEFAULT_ACT = ActionType('one_d_rpm')
