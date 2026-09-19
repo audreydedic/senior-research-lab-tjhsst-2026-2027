@@ -14,12 +14,41 @@ The drones move along 2D trajectories in the X-Z plane, between x == +.5 and -.5
 import time
 import argparse
 import numpy as np
+import math
 
 from gym_pybullet_drones.utils.utils import sync, str2bool
 from gym_pybullet_drones.utils.enums import DroneModel, Physics
 from gym_pybullet_drones.envs.CtrlAviary import CtrlAviary
 from gym_pybullet_drones.control.DSLPIDControl import DSLPIDControl
 from gym_pybullet_drones.utils.Logger import Logger
+
+from djitellopy import tello # physical drone
+
+# physical drone
+drone = tello.Tello()
+drone.connect()
+
+print("------------------------------------------")
+print(f"battery level: {drone.get_battery()}%")
+print("------------------------------------------")
+
+print("------------------------------------------")
+print(f"battery level: {drone.get_battery()}%")
+print(f"temperature: {drone.get_highest_temperature()}°C")
+print("------------------------------------------")
+
+time.sleep(1)
+
+drone.takeoff()
+
+def moveToPosition(v):
+    # v is an point vector from [0,0,0] to any desired point
+    x,y,z = v[0],v[1],v[2]
+    distance = math.sqrt(x**2 + y**2 + z**2)
+    angle = math.acos()
+
+    return
+
 
 DEFAULT_DRONE = DroneModel('cf2x')
 DEFAULT_GUI = True
@@ -42,9 +71,9 @@ def run(
         colab=DEFAULT_COLAB
     ):
     #### Initialize the simulation #############################
-    INIT_XYZS = np.array([[.5, 0, 1],[-.5, 0, .5]])
+    INIT_XYZS = np.array([[.5, 0, 1]])
     env = CtrlAviary(drone_model=drone,
-                     num_drones=2,
+                     num_drones=1,
                      initial_xyzs=INIT_XYZS,
                      physics=Physics.PYB_DW,
                      neighbourhood_radius=10,
@@ -52,7 +81,7 @@ def run(
                      ctrl_freq=control_freq_hz,
                      gui=gui,
                      record=record_video,
-                     obstacles=True
+                     obstacles=False
                      )
 
     #### Initialize the trajectories ###########################
@@ -83,18 +112,18 @@ def run(
         obs, reward, terminated, truncated, info = env.step(action)
 
         #### Compute control for the current way point #############
-        for j in range(2):
+        for j in range(1):
             action[j, :], _, _ = ctrl[j].computeControlFromState(control_timestep=env.CTRL_TIMESTEP,
                                                                     state=obs[j],
                                                                     target_pos=np.hstack([TARGET_POS[wp_counters[j], :], INIT_XYZS[j, 2]]),
                                                                     )
 
         #### Go to the next way point and loop #####################
-        for j in range(2):
+        for j in range(1):
             wp_counters[j] = wp_counters[j] + 1 if wp_counters[j] < (NUM_WP-1) else 0
 
         #### Log the simulation ####################################
-        for j in range(2):
+        for j in range(1):
             logger.log(drone=j,
                        timestamp=i/env.CTRL_FREQ,
                        state=obs[j],

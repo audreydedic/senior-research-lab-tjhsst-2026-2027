@@ -2,10 +2,34 @@ import pybullet as p
 import time
 import pybullet_data
 import numpy as np
+from gym_pybullet_drones.envs.HoverAviary import HoverAviary
+from gym_pybullet_drones.utils.enums import ObservationType, ActionType
+from gym_pybullet_drones.utils.enums import DroneModel, Physics, ActionType, ObservationType
+
 
 # connects to the physics simulator (GUI launches the graphical window, but DIRECT doesn't)
 physicsClient = p.connect(p.GUI)#or p.DIRECT for non-graphical version
 p.setAdditionalSearchPath(pybullet_data.getDataPath()) #optionally
+
+
+
+
+# connecting to HoverAviary environement
+env = HoverAviary(
+                 drone_model=DroneModel.CF2X,
+                 initial_xyzs=None,
+                 initial_rpys=None,
+                 physics=Physics.PYB,
+                 pyb_freq = 240,
+                 ctrl_freq = 30,
+                 gui=False,
+                 record=False,
+                 obs=ObservationType.KIN,
+                 act=ActionType.RPM
+                 )
+
+
+
 
 # environment set up
 p.setGravity(0,0,-10)
