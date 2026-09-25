@@ -1,52 +1,48 @@
-# https://www.geeksforgeeks.org/computer-vision/object-detection-with-yolo-and-opencv/ from this tutorial
-
 import cv2
-import random
 from ultralytics import YOLO
 
-yolo = YOLO("yolov8s.pt")
+# Load YOLOv8 model
+model = YOLO("yolov8n.pt")
 
-def getColours(cls_num):
-    """Generate unique colors for each class ID"""
-    random.seed(cls_num)
-    return tuple(random.randint(0, 255) for _ in range(3))
 
-video_path = "sample.mp4"
-videoCap = cv2.VideoCapture(video_path)
+def detect_objects(frame):
+    results = model(frame)
+    detected_objects = []
 
-frame_count = 0
+    for r in results:
+        for box in r.boxes:
+            class_id = int(box.cls[0])  # Get class ID
+            confidence = box.conf[0].item()  # Confidence score
 
-while True:
-    ret, frame = videoCap.read()
-    if not ret:
-        break
-    results = yolo.track(frame, stream=True)
+            if confidence > 0.5:
+                label = model.names[class_id]
+                detected_objects.append(label)
 
-    for result in results:
-        class_names = result.names
-        for box in result.boxes:
-            if box.conf[0] > 0.4:
+                # Draw bounding box
                 x1, y1, x2, y2 = map(int, box.xyxy[0])
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
-                cls = int(box.cls[0])
-                class_name = class_names[cls]
+    return frame, detected_objects
 
-                conf = float(box.conf[0])
 
-                colour = getColours(cls)
+def main():
+    cap = cv2.VideoCapture(0)  # Open webcam
 
-                cv2.rectangle(frame, (x1, y1), (x2, y2), colour, 2)
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
 
-                cv2.putText(frame, f"{class_name} {conf:.2f}",
-                            (x1, max(y1 - 10, 20)), cv2.FONT_HERSHEY_SIMPLEX,
-                            0.6, colour, 2)
+        frame, detected_objects = detect_objects(frame)
+        cv2.imshow("YOLO Vision", frame)
+        if detected_objects:
+            print("Detected objects:", detected_objects)
+        key = cv2.waitKey(1) & 0xFF
 
-    if frame_count < 20:
-        img=cv2.imread(frame)
-        cv2.imshow('Image Window', img)
-    else:
-        break
+    cap.release()
+    cv2.destroyAllWindows()
 
-    frame_count += 1
 
-videoCap.release()
+if __name__ == "__main__":
+    main()
