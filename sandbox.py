@@ -44,13 +44,13 @@ def main():
     drone.streamon()
 
     time.sleep(1)
-    drone.takeoff()
+    # drone.takeoff()
 
     # moves drone in square (works)
-    moveToPosition(drone,[50,50])
-    moveToPosition(drone,[50,50])
-    moveToPosition(drone,[50,50])
-    moveToPosition(drone,[50,50])
+    # moveToPosition(drone,[50,50])
+    # moveToPosition(drone,[50,50])
+    # moveToPosition(drone,[50,50])
+    # moveToPosition(drone,[50,50])
     process_tello_video(drone)
 
 
