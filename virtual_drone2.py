@@ -25,21 +25,21 @@ from gym_pybullet_drones.utils.Logger import Logger
 from djitellopy import tello # physical drone
 
 # physical drone
-drone = tello.Tello()
-drone.connect()
+# drone = tello.Tello()
+# drone.connect()
 
-print("------------------------------------------")
-print(f"battery level: {drone.get_battery()}%")
-print("------------------------------------------")
+# print("------------------------------------------")
+# print(f"battery level: {drone.get_battery()}%")
+# print("------------------------------------------")
 
-print("------------------------------------------")
-print(f"battery level: {drone.get_battery()}%")
-print(f"temperature: {drone.get_highest_temperature()}°C")
-print("------------------------------------------")
+# print("------------------------------------------")
+# print(f"battery level: {drone.get_battery()}%")
+# print(f"temperature: {drone.get_highest_temperature()}°C")
+# print("------------------------------------------")
 
-time.sleep(1)
+# time.sleep(1)
 
-drone.takeoff()
+# drone.takeoff()
 
 def moveToPosition(v):
     # v is an point vector from [0,0,0] to any desired point
@@ -48,7 +48,6 @@ def moveToPosition(v):
     angle = math.acos()
 
     return
-
 
 DEFAULT_DRONE = DroneModel('cf2x')
 DEFAULT_GUI = True
