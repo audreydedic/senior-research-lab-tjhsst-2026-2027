@@ -4,7 +4,6 @@ from ultralytics import YOLO
 # Load YOLOv8 model
 model = YOLO("yolov8n.pt")
 
-
 def detect_objects(frame):
     results = model(frame)
     detected_objects = []
@@ -24,7 +23,6 @@ def detect_objects(frame):
                 cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
     return frame, detected_objects
-
 
 def main():
     cap = cv2.VideoCapture(0)  # Open webcam
