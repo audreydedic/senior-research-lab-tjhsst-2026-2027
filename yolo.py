@@ -1,8 +1,39 @@
 import cv2
-from ultralytics import YOLO
+from ultralytics import YOLO, solutions
 
-# Load YOLOv8 model
-model = YOLO("yolov8n.pt")
+# Load model
+model = YOLO("yolo26n.pt")
+
+# depth one
+depth_model = YOLO("yolo26n-depth.pt")
+
+def detect_objects_depth(frame):
+    detected_objects = []
+    
+    # bounding boxes (object detection)
+    results = model(frame)
+    for r in results:
+        for box in r.boxes:
+            class_id = int(box.cls[0])  # Get class ID
+            confidence = box.conf[0].item()  # Confidence score
+
+            if confidence > 0.5:
+                label = model.names[class_id]
+                detected_objects.append(label)
+
+                # Draw bounding box removed since distance calc draws boxes for camera
+                x1, y1, x2, y2 = map(int, box.xyxy[0])
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+
+    # depth perception
+    results = depth_model(frame)
+    for r in results:
+        depth_heatmap =r.plot()
+    frame = depth_heatmap
+
+    return frame, detected_objects
+
 
 def detect_objects(frame):
     results = model(frame)
@@ -17,7 +48,7 @@ def detect_objects(frame):
                 label = model.names[class_id]
                 detected_objects.append(label)
 
-                # Draw bounding box
+                # Draw bounding box removed since distance calc draws boxes for camera
                 x1, y1, x2, y2 = map(int, box.xyxy[0])
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
@@ -32,7 +63,7 @@ def main():
         if not ret:
             break
 
-        frame, detected_objects = detect_objects(frame)
+        frame, detected_objects = detect_objects_depth(frame)
         cv2.imshow("YOLO Vision", frame)
         if detected_objects:
             print("Detected objects:", detected_objects)
