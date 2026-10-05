@@ -65,26 +65,6 @@ def detect_objects_depth(frame):
 
     return frame, detected_objects, depth
 
-def detect_objects(frame):
-    results = model(frame)
-    detected_objects = []
-
-    for r in results:
-        for box in r.boxes:
-            class_id = int(box.cls[0])  # Get class ID
-            confidence = box.conf[0].item()  # Confidence score
-
-            if confidence > 0.5:
-                label = model.names[class_id]
-                detected_objects.append(label)
-
-                # Draw bounding box removed since distance calc draws boxes for camera
-                x1, y1, x2, y2 = map(int, box.xyxy[0])
-                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-
-    return frame, detected_objects
-
 def process_tello_video(drone):
     STOPPING_DISTANCE=100
     SPEED=50
@@ -93,9 +73,9 @@ def process_tello_video(drone):
         frame=drone.get_frame_read().frame # get the frames from tello
         frame,detected_objects,depth = detect_objects_depth(frame)
 
-        print("-----------------------")
-        print(depth)
-        print("-----------------------")
+        # print("-----------------------")
+        # print(depth)
+        # print("-----------------------")
 
         # print(detected_objects) # list of detected labels
         if('person' in detected_objects and depth > STOPPING_DISTANCE):
@@ -113,9 +93,6 @@ def main():
     drone.connect()
     print("------------------------------------------")
     print(f"battery level: {drone.get_battery()}%")
-    print("------------------------------------------")
-    print("------------------------------------------")
-    print(f"battery level: {drone.get_battery()}%")
     print(f"temperature: {drone.get_highest_temperature()}°C")
     print("------------------------------------------")
 
@@ -124,7 +101,7 @@ def main():
 
     time.sleep(1)
     drone.takeoff()
-    drone.move_up(60)
+    drone.move_up(60) # match person height
 
     # time.sleep(2)
     process_tello_video(drone)

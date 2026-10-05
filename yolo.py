@@ -2,10 +2,8 @@ import cv2
 from ultralytics import YOLO, solutions
 import numpy as np
 
-# Load model
-model = YOLO("yolo26n.pt")
-
-# depth one
+# Load models
+model = YOLO("yolov8n.pt")
 depth_model = YOLO("yolo26n-depth.pt")
 
 def detect_objects_depth(frame):
@@ -22,13 +20,11 @@ def detect_objects_depth(frame):
             if confidence > 0.5:
                 label = model.names[class_id]
                 detected_objects.append(label)
-
                 # Draw bounding box removed since distance calc draws boxes for camera
                 x1, y1, x2, y2 = map(int, box.xyxy[0])
                 coordinates.append([x1, y1, x2, y2])
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
-
 
     # depth perception
     depth_of_object = 0
@@ -51,36 +47,46 @@ def detect_objects_depth(frame):
 
     frame = depth_heatmap
 
-    print()
-    print(depth_of_object)
-    print()
+    centerX,centerY = ((coors[0]+coors[2])/2), ((coors[1]+coors[3])/2)
+    center_coors = (centerX,centerY)
 
     if(np.isnan(depth_of_object)):
         depth_of_object=0
     
     depth = int(depth_of_object*100)
+    height,width,channels = frame.shape
+    horizontal_displacement=centerX-(width/2)
 
-    return frame, detected_objects, depth
+    print()
+    print("-----------------------------------------------------------")
+    print(f"Depth of nearest person: {depth}cm")
+    # print(f"Min/max coordinates of object: ({coors[0]},{coors[1]}) , ({coors[2]},{coors[3]})")
+    print(f"Center coordinate of object: {center_coors}")
+    print(f"Displacement: {horizontal_displacement}")
+    print("-----------------------------------------------------------")
+    # print()
 
-def detect_objects(frame):
-    results = model(frame)
-    detected_objects = []
+    return frame, detected_objects, depth, horizontal_displacement
 
-    for r in results:
-        for box in r.boxes:
-            class_id = int(box.cls[0])  # Get class ID
-            confidence = box.conf[0].item()  # Confidence score
+# def detect_objects(frame):
+#     results = model(frame)
+#     detected_objects = []
 
-            if confidence > 0.5:
-                label = model.names[class_id]
-                detected_objects.append(label)
+#     for r in results:
+#         for box in r.boxes:
+#             class_id = int(box.cls[0])  # Get class ID
+#             confidence = box.conf[0].item()  # Confidence score
 
-                # Draw bounding box removed since distance calc draws boxes for camera
-                x1, y1, x2, y2 = map(int, box.xyxy[0])
-                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+#             if confidence > 0.5:
+#                 label = model.names[class_id]
+#                 detected_objects.append(label)
 
-    return frame, detected_objects
+#                 # Draw bounding box removed since distance calc draws boxes for camera
+#                 x1, y1, x2, y2 = map(int, box.xyxy[0])
+#                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+#                 cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+
+#     return frame, detected_objects
 
 def main():
     cap = cv2.VideoCapture(0)  # Open webcam
@@ -89,26 +95,12 @@ def main():
         ret, frame = cap.read()
         if not ret:
             break
-
-        frame, detected_objects, depth = detect_objects_depth(frame)
-
-        print("-----------------------")
-        print(depth)
-        print("-----------------------")
-
+        frame, detected_objects, depth, displacement = detect_objects_depth(frame)
         cv2.imshow("YOLO Vision", frame)
-        if detected_objects:
-            print("Detected objects:", detected_objects)
         key = cv2.waitKey(1) & 0xFF
-
-        if('person' in detected_objects and depth > 20):
-            print("MOVING FORWARD")
-        else:
-            print("STOPPED")
 
     cap.release()
     cv2.destroyAllWindows()
-
 
 if __name__ == "__main__":
     main()
