@@ -86,8 +86,8 @@ def detect_objects(frame):
     return frame, detected_objects
 
 def process_tello_video(drone):
-    STOPPING_DISTANCE=200
-    SPEED=200
+    STOPPING_DISTANCE=100
+    SPEED=50
 
     while True:
         frame=drone.get_frame_read().frame # get the frames from tello
@@ -124,8 +124,9 @@ def main():
 
     time.sleep(1)
     drone.takeoff()
-    drone.move_up(50)
+    drone.move_up(60)
 
+    # time.sleep(2)
     process_tello_video(drone)
 
 if __name__ == "__main__":
