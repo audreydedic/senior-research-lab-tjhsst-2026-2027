@@ -73,10 +73,6 @@ def process_tello_video(drone):
         frame=drone.get_frame_read().frame # get the frames from tello
         frame,detected_objects,depth = detect_objects_depth(frame)
 
-        # print("-----------------------")
-        # print(depth)
-        # print("-----------------------")
-
         # print(detected_objects) # list of detected labels
         if('person' in detected_objects and depth > STOPPING_DISTANCE):
             drone.move_forward(SPEED)
