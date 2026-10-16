@@ -3,7 +3,7 @@ from ultralytics import YOLO, solutions
 import numpy as np
 
 # Load models
-model = YOLO("yolov8n.pt")
+model = YOLO("yolo26n.pt")
 depth_model = YOLO("yolo26n-depth.pt")
 
 def detect_objects_depth(frame):
@@ -85,6 +85,8 @@ def detect_objects_depth(frame):
     # draw center points
     cv2.circle(frame,(x,y), 10, (255,255,255), -1)
     cv2.circle(frame,(int(width/2),int(height/2)), 10, (0,255,0), -1)
+
+    cv2.putText(frame, f"horizontal displacement: {horizontal_displacement}", (5, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
     return frame, detected_objects, depth, horizontal_displacement
 
