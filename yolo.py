@@ -57,6 +57,7 @@ def detect_objects_depth(frame):
     height,width,channels = frame.shape
     horizontal_displacement=centerX-(width/2)
 
+    # draw boxes around detected objs
     for i in range(len(detected_objects)):
         c = coordinates[i]
         l = detected_objects[i]
@@ -74,14 +75,14 @@ def detect_objects_depth(frame):
     print("-----------------------------------------------------------")
     print(f"Depth of nearest person: {depth}cm")
     # print(f"Min/max coordinates of object: ({coors[0]},{coors[1]}) , ({coors[2]},{coors[3]})")
-    print(f"Center coordinate of object: {center_coors}")
+    # print(f"Center coordinate of object: {center_coors}")
     print(f"Displacement: {horizontal_displacement}")
     print("-----------------------------------------------------------")
-    # print()
 
     x = int(centerX)
     y = int(centerY)
 
+    # draw center points
     cv2.circle(frame,(x,y), 10, (255,255,255), -1)
     cv2.circle(frame,(int(width/2),int(height/2)), 10, (0,255,0), -1)
 

@@ -25,13 +25,11 @@ def detect_objects_depth(frame):
             if confidence > 0.5:
                 label = model.names[class_id]
                 detected_objects.append(label)
-
                 # Draw bounding box removed since distance calc draws boxes for camera
                 x1, y1, x2, y2 = map(int, box.xyxy[0])
                 coordinates.append([x1, y1, x2, y2])
-                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
-
+                # cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                # cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
 
     # depth perception
     depth_of_object = 0
@@ -54,26 +52,60 @@ def detect_objects_depth(frame):
 
     frame = depth_heatmap
 
-    print()
-    print(depth_of_object)
-    print()
+    centerX,centerY = ((coors[0]+coors[2])/2), ((coors[1]+coors[3])/2)
+    center_coors = (centerX,centerY)
 
     if(np.isnan(depth_of_object)):
         depth_of_object=0
     
     depth = int(depth_of_object*100)
+    height,width,channels = frame.shape
+    horizontal_displacement=centerX-(width/2)
 
-    return frame, detected_objects, depth
+    # draw boxes around detected objs
+    for i in range(len(detected_objects)):
+        c = coordinates[i]
+        l = detected_objects[i]
+        x1=c[0]
+        y1=c[1]
+        x2=c[2]
+        y2=c[3]
+        if(x1==coors[0] and y1==coors[1] and x2 == coors[2] and y2==coors[3]):
+            label = f"{l}: {depth}cm"
+        else: label = l
+        cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 255, 255), 2)
+        cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+
+    print()
+    print("-----------------------------------------------------------")
+    print(f"Depth of nearest person: {depth}cm")
+    # print(f"Min/max coordinates of object: ({coors[0]},{coors[1]}) , ({coors[2]},{coors[3]})")
+    # print(f"Center coordinate of object: {center_coors}")
+    print(f"Displacement: {horizontal_displacement}")
+    print("-----------------------------------------------------------")
+
+    x = int(centerX)
+    y = int(centerY)
+
+    # draw center points
+    cv2.circle(frame,(x,y), 10, (255,255,255), -1)
+    cv2.circle(frame,(int(width/2),int(height/2)), 10, (0,255,0), -1)
+
+    return frame, detected_objects, depth, horizontal_displacement
 
 def process_tello_video(drone):
-    STOPPING_DISTANCE=100
-    SPEED=50
+    STOPPING_DISTANCE=300
+    SPEED=STOPPING_DISTANCE
 
     while True:
         frame=drone.get_frame_read().frame # get the frames from tello
-        frame,detected_objects,depth = detect_objects_depth(frame)
+        frame,detected_objects,depth, horizontal_displacement = detect_objects_depth(frame)
 
         # print(detected_objects) # list of detected labels
+        if(horizontal_displacement>20):
+            drone.rotate_clockwise(15)
+        elif(horizontal_displacement<-20):
+            drone.rotate_counter_clockwise(15)
         if('person' in detected_objects and depth > STOPPING_DISTANCE):
             drone.move_forward(SPEED)
 
