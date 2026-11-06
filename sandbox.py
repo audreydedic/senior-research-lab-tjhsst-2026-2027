@@ -1,16 +1,29 @@
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
 import math
 from djitellopy import tello
 import time
 import numpy as np
 import cv2
 from ultralytics import YOLO
+import torch
 
-# Load model
-model = YOLO("yolonano.pt")
-model2 = YOLO("yolov8n.pt")
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+    print(f"GPU available: {torch.cuda.get_device_name(0)}")
+elif torch.backends.mps.is_available():
+    device = torch.device("mps")
+    print("Apple Silicon GPU available.")
+else:
+    device = torch.device("cpu")
+    print("GPU not available. Using CPU.")
 
-# depth one
-depth_model = YOLO("yolo26n-depth.pt")
+    
+# Load models2
+model = YOLO("yolonano.pt").to(device)
+model2 = YOLO("yolov8n.pt").to(device)
+depth_model = YOLO("yolo26n-depth.pt").to(device)
 
 def detect_objects_depth(frame):
     frame = cv2.resize(frame,None,fx=0.5,fy=0.5,interpolation=cv2.INTER_AREA)
@@ -39,8 +52,8 @@ def detect_objects_depth(frame):
             confidence = box.conf[0].item()  # Confidence score
 
             if confidence > 0.5:
-                    label = model.names[class_id]
-                # if label==DETECT_THIS_LABEL:
+                label = model.names[class_id]
+                if label==DETECT_THIS_LABEL:
                     detected_objects.append(label)
                     # Draw bounding box removed since distance calc draws boxes for camera
                     x1, y1, x2, y2 = map(int, box.xyxy[0])
@@ -56,21 +69,27 @@ def detect_objects_depth(frame):
         depth_map = r.depth.data.cpu().numpy()
 
         coors = [0,1,0,1]
+        closest_depth = math.inf
+        closest_coors = [0,1,0,1]
+
+
         for i in range(len(detected_objects)):
             if detected_objects[i]==DETECT_THIS_LABEL:
                 coors = coordinates[i]
-        x1=coors[0]
-        y1=coors[1]
-        x2=coors[2]
-        y2=coors[3]
-        # x1, y1, x2, y2 = map(int, box.xyxy[0].cpu().numpy())
-        region_depth = depth_map[y1:y2,x1:x2]
-        # if(np.median(region_depth)<depth_of_object):
-        depth_of_object = np.median(region_depth)
-            # x1=coors[0]
-            # y1=coors[1]
-            # x2=coors[2]
-            # y2=coors[3]
+                x1=coors[0]
+                y1=coors[1]
+                x2=coors[2]
+                y2=coors[3]
+
+                region_depth = depth_map[y1:y2,x1:x2]
+                depth_of_object = np.median(region_depth)
+                if depth_of_object<closest_depth:
+                    closest_depth=depth_of_object
+                    closest_coors=coordinates[i]
+
+        coors = closest_coors
+        depth_of_object=closest_depth
+
 
     frame = depth_heatmap
 
@@ -120,13 +139,17 @@ def detect_objects_depth(frame):
     return frame, detected_objects, depth, horizontal_displacement, vertical_displacement, person_detected
 
 def process_tello_video(drone):
-    STOPPING_DISTANCE=200
+    STOPPING_DISTANCE=100
     SPEED=STOPPING_DISTANCE
     TURN_BUFFER = 50
+
+    time.sleep(5)
 
     while True:
         frame=drone.get_frame_read().frame # get the frames from tello
         frame,detected_objects,depth, horizontal_displacement, vertical_displacement,person_detected = detect_objects_depth(frame)
+
+        time.sleep(.5)
 
         # turn adjustment
         if(horizontal_displacement>TURN_BUFFER):
@@ -134,21 +157,21 @@ def process_tello_video(drone):
         elif(horizontal_displacement<-TURN_BUFFER):
             drone.rotate_counter_clockwise(20)
 
-        print("VERTICAL DISPLACEMENT***************")
-        print(vertical_displacement)
-        print("*************************")
+        # print("VERTICAL DISPLACEMENT***************")
+        # print(vertical_displacement)
+        # print("*************************")
 
-        # height adjustment
-        if(vertical_displacement==179 and person_detected):
-            drone.move_up(60)
-        if(vertical_displacement>50):
-            drone.move_down(20)
-        elif(horizontal_displacement<-50):
-            drone.move_up(20)
+        # # height adjustment
+        # if(vertical_displacement==179 and person_detected):
+        #     drone.move_up(60)
+        # if(vertical_displacement>50):
+        #     drone.move_down(20)
+        # elif(horizontal_displacement<-50):
+        #     drone.move_up(20)
         
         # move forward
-        # if('person' in detected_objects and depth > STOPPING_DISTANCE):
-        #     drone.move_forward(SPEED)
+        if('head' in detected_objects and depth > STOPPING_DISTANCE):
+            drone.move_forward(SPEED)
 
         cv2.imshow("Drone Camera",frame) # display frames obtained from tello
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -160,6 +183,7 @@ def main():
     # instantiate drone object and connect to the drone
     drone = tello.Tello()
     drone.connect()
+    time.sleep(2)
     print("------------------------------------------")
     print(f"battery level: {drone.get_battery()}%")
     print(f"temperature: {drone.get_highest_temperature()}°C")
@@ -167,10 +191,12 @@ def main():
 
     # camera streaming for drone
     drone.streamon()
+    time.sleep(2)
 
-    time.sleep(1)
     drone.takeoff()
-    drone.move_up(60) # match person height
+    time.sleep(2)
+    drone.move_up(90) # match person height
+    time.sleep(2)
 
     # time.sleep(2)
     process_tello_video(drone)

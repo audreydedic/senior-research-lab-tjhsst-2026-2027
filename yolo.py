@@ -1,12 +1,27 @@
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
 import cv2
 from ultralytics import YOLO, solutions
 import numpy as np
 import math
+import torch
 
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+    print(f"GPU available: {torch.cuda.get_device_name(0)}")
+elif torch.backends.mps.is_available():
+    device = torch.device("mps")
+    print("Apple Silicon GPU available.")
+else:
+    device = torch.device("cpu")
+    print("GPU not available. Using CPU.")
+
+    
 # Load models2
-model = YOLO("yolonano.pt")
-model2 = YOLO("yolov8n.pt")
-depth_model = YOLO("yolo26n-depth.pt")
+model = YOLO("yolonano.pt").to(device)
+model2 = YOLO("yolov8n.pt").to(device)
+depth_model = YOLO("yolo26n-depth.pt").to(device)
 
 def detect_objects_depth(frame):
     frame = cv2.resize(frame,None,fx=0.5,fy=0.5,interpolation=cv2.INTER_AREA)
@@ -35,8 +50,8 @@ def detect_objects_depth(frame):
             confidence = box.conf[0].item()  # Confidence score
 
             if confidence > 0.5:
-                    label = model.names[class_id]
-                # if label==DETECT_THIS_LABEL:
+                label = model.names[class_id]
+                if label==DETECT_THIS_LABEL:
                     detected_objects.append(label)
                     # Draw bounding box removed since distance calc draws boxes for camera
                     x1, y1, x2, y2 = map(int, box.xyxy[0])
@@ -52,21 +67,27 @@ def detect_objects_depth(frame):
         depth_map = r.depth.data.cpu().numpy()
 
         coors = [0,1,0,1]
+        closest_depth = math.inf
+        closest_coors = [0,1,0,1]
+
+
         for i in range(len(detected_objects)):
             if detected_objects[i]==DETECT_THIS_LABEL:
                 coors = coordinates[i]
-        x1=coors[0]
-        y1=coors[1]
-        x2=coors[2]
-        y2=coors[3]
-        # x1, y1, x2, y2 = map(int, box.xyxy[0].cpu().numpy())
-        region_depth = depth_map[y1:y2,x1:x2]
-        # if(np.median(region_depth)<depth_of_object):
-        depth_of_object = np.median(region_depth)
-            # x1=coors[0]
-            # y1=coors[1]
-            # x2=coors[2]
-            # y2=coors[3]
+                x1=coors[0]
+                y1=coors[1]
+                x2=coors[2]
+                y2=coors[3]
+
+                region_depth = depth_map[y1:y2,x1:x2]
+                depth_of_object = np.median(region_depth)
+                if depth_of_object<closest_depth:
+                    closest_depth=depth_of_object
+                    closest_coors=coordinates[i]
+
+        coors = closest_coors
+        depth_of_object=closest_depth
+
 
     frame = depth_heatmap
 
