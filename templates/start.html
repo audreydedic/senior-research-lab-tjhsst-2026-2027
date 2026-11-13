@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drone Senior Research Lab</title>
+
+    <style>
+
+        @font-face {
+            font-family: 'OCRA';
+            src: url('static/fonts/OCRAStd.otf') format('opentype');
+        }
+
+        .banner{
+            background-color: black;
+            background-size: cover;
+            display: flex;
+            width: 100%;
+            padding: 10px;
+            border-bottom: 1px solid white;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer{
+            box-sizing: border-box;
+            background-color: black;
+            background-size: cover;
+            display: flex;
+            width: 100%;
+            padding: 10px;
+            gap: 10px;
+            border-top: 1px solid white;
+            /* flex-direction: column;
+            align-items: center;
+            justify-content: center; */
+        }
+
+        body{
+            /* background-color: rgb(42, 43, 53); */
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url("https://cdn.sanity.io/images/mgxz50fq/production-v3-red/acd96886884d7fbd3cefb8bc7aca0125b9c2d458-1167x2044.png?w=3000&fit=max&auto=format");
+            background-repeat: no-repeat;
+            background-size: cover;
+            /* height: 10in; */
+            display: flex;
+            align-items: center;
+            /* justify-content: center; */
+            flex-direction: column;
+            /* border-right: 10px; */
+            /* margin-left: 25px; */
+            margin: 0px;
+
+        }  
+
+        .center_div{
+            /* background-color: rgba(0, 0, 0, 0.5); */
+            /* border: 1px solid white; */
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 10px;
+
+        }
+
+        .noncenter_div{
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 1px solid white;
+            padding: 10px;
+            display: flex;
+            /* align-items: center;
+            justify-content: center; */
+            flex-direction: rows;
+        }
+
+        h1,p,a,label,h2, ol,li, button{
+            font-family: 'OCRA';
+            color: rgb(255, 255, 255);
+        }
+
+    
+        button{
+            background-color:  rgba(76, 78, 95, 0.215);
+            border: solid white 1px;
+            padding: 5px;
+            width: 100px;
+            height: 100px;
+        }
+
+        .video{
+            width: 800px;
+            height: 450px;
+        }
+
+        
+
+    </style>
+
+</head>
+<body>
+
+    <!-- <h1>Search and Rescue Drone Nagivation</h1> -->
+    <!-- <p>TJHSST Computer Systems Senior Research Lab for Audrey Dedicatoria</p> -->
+
+    <div class="banner">
+        <h2>Search and Rescue Drone Nagivation</h2>
+    </div>
+
+    <h2>Drone Camera View</h2>
+    <div>
+        <!-- <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRW8glGX_hjjQ_GZ4HFDIp3hH71R9cgZ3z9Xhal5eXVGyxphpmDVR5qRJY&s=10" alt="Video Feed" class="video"> -->
+        <!-- <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRW8glGX_hjjQ_GZ4HFDIp3hH71R9cgZ3z9Xhal5eXVGyxphpmDVR5qRJY&s=10" alt="Video Feed" class="normal video stream"> -->
+
+        
+        <!-- <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRW8glGX_hjjQ_GZ4HFDIp3hH71R9cgZ3z9Xhal5eXVGyxphpmDVR5qRJY&s=10" alt=""> -->
+    </div>
+
+    <div class="noncenter_div">
+        <div class="center_div">
+            <button>Toggle YOLO</button>
+        </div>
+
+        <!-- <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRW8glGX_hjjQ_GZ4HFDIp3hH71R9cgZ3z9Xhal5eXVGyxphpmDVR5qRJY&s=10" alt="Video Feed" class="video"> -->
+        <img src="{{ url_for('yolo_video') }}" alt="Video Feed" class="video">
+
+        <div class="center_div">
+            <button>Take Off</button>
+            <button>Land</button>
+            <img src="https://static.wikia.nocookie.net/4e55e0e7-743e-43e9-9eeb-2b369d51dd97/scale-to-width/755" alt="" width="100px" height="100px" style="opacity: 0.7; display: block;">
+        </div>
+
+    </div>
+
+    <p>TJHSST Computer Systems Senior Research Lab for Audrey Dedicatoria</p>
+    <!-- <a href="https://github.com/audreydedic/senior-research-lab-tjhsst-2026-2027">Github</a> -->
+
+    <div class="footer">
+        <!-- <h2>About</h2> -->
+        <p>Autonomous drones have implementations in many fields of work such as delivery, defense, and Search-and-Rescue. In the context of Search-and-Rescue, drones are extremely useful for scouting for survivors and patrolling unsafe/harder to reach areas in the event of a natural disaster. </p>
+        <p>While many modern day Search-and-Rescue drones are used for outdoor survivor detection, there is a limited amount of drones that can navigate through collapsed or potentially indoor areas like caves when searching for survivors.</p>
+        <p>By implementing autonomous Search-and-Rescue qualities on a smaller, nimbler vehicle, autonomous drones can now access and navigate through these dangerous areas like underground caves or collapsed houses. Also, by refining a YOLO model to better detect humans from far away, it will decrease the chances of human survivors accidentally being missed by the drone’s detection system.</p>
+    </div>
+
+
+    <!-- <p>Autonomous drones have implementations in many fields of work such as delivery, defense, and Search-and-Rescue. In the context of Search-and-Rescue, drones are extremely useful for scouting for survivors and patrolling unsafe/harder to reach areas in the event of a natural disaster. </p>
+    <p>While many modern day Search-and-Rescue drones are used for outdoor survivor detection, there is a limited amount of drones that can navigate through collapsed or potentially indoor areas like caves when searching for survivors.</p>
+    <p>By implementing autonomous Search-and-Rescue qualities on a smaller, nimbler vehicle, autonomous drones can now access and navigate through these dangerous areas like underground caves or collapsed houses. Also, by refining a YOLO model to better detect humans from far away, it will decrease the chances of human survivors accidentally being missed by the drone’s detection system.</p> -->
+
+
+
+</body>
+</html>
